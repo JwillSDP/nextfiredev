@@ -1,40 +1,42 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState, useEffect } from "react";
+
 import {
    onAuthStateChanged,
-   signInWithPopup,
    signOut,
    GoogleAuthProvider,
+   signInWithRedirect,
 } from "firebase/auth";
-import { auth, providerG } from "@/firebaseconfig";
+import { collection, addDoc } from "firebase/firestore";
+import { auth, providerG, db } from "@/firebaseconfig";
 
 export default function Home() {
-   const [userData, setUserData] = useState(null);
+   const [userUid, setUserUid] = useState(null);
+
+   useEffect(() => {
+      onAuthStateChanged(auth, (user) => {
+         if (user) {
+            const uid = user.uid;
+            setUserUid(uid);
+            console.log(
+               "🚀 ~ file: page.js:24 ~ onAuthStateChanged ~ uid:",
+               uid
+            );
+            // ...
+         } else {
+            // User is signed out
+            // ...
+         }
+      });
+   }, []);
 
    const signInGoogle = async () => {
-      await signInWithPopup(auth, providerG)
-         .then((result) => {
-            // This gives you a Google Access Token. You can use it to access the Google API.
-            const credential = GoogleAuthProvider.credentialFromResult(result);
-            const token = credential.accessToken;
-            // The signed-in user info.
-            const user = result.user;
-            // IdP data available using getAdditionalUserInfo(result)
-            // ...
-         })
-         .catch((error) => {
-            // Handle Errors here.
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            // The email of the user's account used.
-
-            // The AuthCredential type that was used.
-            const credential = GoogleAuthProvider.credentialFromError(error);
-            // ...
-         });
+      await signInWithRedirect(auth, providerG);
    };
+
    const logOut = async () => {
       await signOut(auth)
          .then(() => {
@@ -43,6 +45,19 @@ export default function Home() {
          .catch((error) => {
             // An error happened.
          });
+   };
+
+   const sendData = async () => {
+      try {
+         const docRef = await addDoc(collection(db, "users"), {
+            first: "Ada",
+            last: "Lovelace",
+            born: 1815,
+         });
+         console.log("Document written with ID: ", docRef.id);
+      } catch (e) {
+         console.error("Error adding document: ", e);
+      }
    };
 
    return (
@@ -71,12 +86,11 @@ export default function Home() {
                </a>
             </div>
          </div>
-         <button
-            onClick={signInGoogle}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-         >
-            G Login
-         </button>
+         <Link href="/login">
+            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+               Sign In
+            </button>
+         </Link>
 
          <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
             <Image
@@ -89,12 +103,26 @@ export default function Home() {
             />
          </div>
 
-         <button
-            onClick={logOut}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-         >
-            Logout
-         </button>
+         {!userUid ? (
+            ""
+         ) : (
+            <button
+               onClick={logOut}
+               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+               Logout
+            </button>
+         )}
+         {!userUid ? (
+            ""
+         ) : (
+            <button
+               onClick={sendData}
+               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+               Send Data
+            </button>
+         )}
 
          <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
             <a
