@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { doc, setDoc } from "firebase/firestore";
 
 import {
    onAuthStateChanged,
@@ -14,16 +15,16 @@ import { collection, addDoc } from "firebase/firestore";
 import { auth, providerG, db } from "@/firebaseconfig";
 
 export default function Home() {
-   const [userUid, setUserUid] = useState(null);
+   const [userData, setUserData] = useState(null);
 
    useEffect(() => {
       onAuthStateChanged(auth, (user) => {
          if (user) {
-            const uid = user.uid;
-            setUserUid(uid);
+            setUserData(user.providerData[0]);
+
             console.log(
-               "🚀 ~ file: page.js:24 ~ onAuthStateChanged ~ uid:",
-               uid
+               "🚀 ~ file: page.js:24 ~ onAuthStateChanged ~ user:",
+               user.providerData[0]
             );
             // ...
          } else {
@@ -32,10 +33,6 @@ export default function Home() {
          }
       });
    }, []);
-
-   const signInGoogle = async () => {
-      await signInWithRedirect(auth, providerG);
-   };
 
    const logOut = async () => {
       await signOut(auth)
@@ -49,12 +46,18 @@ export default function Home() {
 
    const sendData = async () => {
       try {
-         const docRef = await addDoc(collection(db, "users"), {
-            first: "Ada",
-            last: "Lovelace",
-            born: 1815,
-         });
-         console.log("Document written with ID: ", docRef.id);
+         if (userData) {
+            await setDoc(doc(db, "user", userData.uid), {
+               userName: "Jason",
+               name: "Los Angeles",
+               state: "CA",
+               country: "USA",
+            });
+            console.log(
+               "🚀 ~ file: page.js:56 ~ awaitsetDoc ~ userData.uid:",
+               userData.uid
+            );
+         }
       } catch (e) {
          console.error("Error adding document: ", e);
       }
@@ -103,7 +106,7 @@ export default function Home() {
             />
          </div>
 
-         {!userUid ? (
+         {!userData ? (
             ""
          ) : (
             <button
@@ -113,7 +116,7 @@ export default function Home() {
                Logout
             </button>
          )}
-         {!userUid ? (
+         {!userData ? (
             ""
          ) : (
             <button
