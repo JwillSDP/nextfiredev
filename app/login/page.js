@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import {
    signInWithEmailAndPassword,
@@ -12,14 +12,11 @@ import { auth, providerG } from "@/firebaseconfig";
 export default function Login() {
    const [userEmail, setUserEmail] = useState("");
    const [userPassword, setuserPassword] = useState("");
+   const router = useRouter();
 
    const signInGoogle = async () => {
       await signInWithRedirect(auth, providerG);
-      await getRedirectResult(auth)
-         .then((result) => {
-            redirect("/", "replace");
-         })
-         .catch((error) => {});
+      router.push("/");
    };
 
    const signInForm = async (email, password) => {
@@ -33,6 +30,7 @@ export default function Login() {
             const errorCode = error.code;
             const errorMessage = error.message;
          });
+      window.location.replace("/");
    };
 
    return (
