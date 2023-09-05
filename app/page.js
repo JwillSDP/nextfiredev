@@ -1,10 +1,13 @@
 "use client";
 
+// React
+
 
 // Flowbite
-import { Alert } from "flowbite-react";
 
 
+// Components
+import CovertComp from "./components/CovertComp";
 
 export const metadata = {
    title: "Jason",
@@ -13,8 +16,8 @@ export const metadata = {
 
 export default function Home() {
    return (
-      <main>
-         <Alert color="info">Alert!</Alert>
-      </main>
+      <>
+         <CovertComp />
+      </>
    );
 }
