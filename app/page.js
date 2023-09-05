@@ -1,7 +1,7 @@
 "use client";
 
 // React
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog } from "@headlessui/react";
 import {
    Bars3Icon,
@@ -15,6 +15,7 @@ import {
 
 // Components
 import CovertComp from "./components/CovertComp";
+import { getCurrentUser } from "@/firebase/auth";
 
 export const metadata = {
    title: "Jason",
@@ -75,6 +76,15 @@ const people = [
 
 export default function Home() {
    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+   const [user, setUser] = useState(null);
+
+   useEffect(() => {
+      getCurrentUser().then((user) => {
+         setUser(user);
+         console.log(user);
+      });
+   }, []);
+
    return (
       <>
          <div className="bg-white">

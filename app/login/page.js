@@ -7,7 +7,7 @@ import {
    signInWithRedirect,
    getRedirectResult,
 } from "firebase/auth";
-import { auth, providerG } from "@/firebaseconfig";
+import { auth, providerG } from "@/firebase/firebaseconfig";
 
 export default function Login() {
    const [userEmail, setUserEmail] = useState("");
